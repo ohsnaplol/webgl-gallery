@@ -40,7 +40,6 @@
             precision mediump float;
             uniform vec4 color;
             void main() {
-                color = vec4(1,0,0,1);
                 gl_FragColor = color;
             }`;
 
@@ -67,20 +66,25 @@
         //linking vertex and shader functions to program
         gl.linkProgram(program);
         
-        //https://docs.gl/gl4/glUseProgram
-        //installs program into current rendering state
-        gl.useProgram(program);
+
+        
+        
+        // Create the GPU array buffer with the vertices
+        const buffer = gl.createBuffer();
+        //bind buffer as current array buffer
+        gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+        gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);        
 
 
         // Shader attribute variable for position
         //matches position attribute in vertex shader
         const positionLocation = gl.getAttribLocation(program, "position");
 
-        // Create the GPU array buffer with the vertices
-        const buffer = gl.createBuffer();
-        //bind buffer as current array buffer
-        gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-        gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
+        //attribute comes disabled
+        //must enable it with the location
+        gl.enableVertexAttribArray(positionLocation);
+        
+        //set pointer
         gl.vertexAttribPointer(
             positionLocation, // Target
             3,        // Chunk size (send the values 3 by 3)
@@ -89,18 +93,26 @@
             0,        // Stride
             0         // Offset
         );
-        gl.enableVertexAttribArray(positionLocation);
+        
+        //https://docs.gl/gl4/glUseProgram
+        //installs program into current rendering state
+        //creates the executable program on the GPU
+        gl.useProgram(program);        
+        
 
         // Shader uniform variable for color (read-only)
-        const color = gl.getUniformLocation(program, "color");
+        // attach js color variable to the color located instide the GLSL
+        const colorLocation = gl.getUniformLocation(program, "color");
 
         // Set color        R  G  B  A
-        gl.uniform4f(color, 0, 1, 0, 1);
+        // color in this case is 
+        gl.uniform4f(colorLocation, 0, 1, 0, 1);
 
         // Set the clear color
         gl.clearColor(0.0, 0.0, 0.0, 1.0);
 
         // Clear canvas
+        // clears out background
         gl.clear(gl.COLOR_BUFFER_BIT);
 
         // Render
@@ -109,6 +121,10 @@
             0,            // Start
             3             // Count
         );
+                        // we have X elements in our array,
+                        //when COUNT = 3
+                        //that means we take 0 for x, 1 for y, 2 for z, then start overflow
+                        //so (arraysize) / count = # of vertexes
 
     </script>
 </body>
