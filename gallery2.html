@@ -10,92 +10,89 @@
     <h1>Hello World!</h1>
     <canvas id="canvas" width="600" height="600"></canvas>
     <script> 
-      // We will put our WebGL code here
-
-     //vertices & index buffer
-
-        const vertices = new Float32Array([
-            0.0, 0.5, 0.0, // First vertex
-            -0.5, -0.5, 0.0, // Second vertex
-            0.5, -0.5, 0.0  // Third vertex
-        ]);
-
-        //const indices[] = {
-        //    0, 1, 2,
-        //    2, 3, 0
-        //};
-
         const gl = document.getElementById("canvas").getContext("webgl");
 
-        //declare shaders
-        const vertexShader = `
-            attribute vec4 position;
-            void main() {
-                gl_Position = position;
-            }`;
+if (!gl) {
+    throw new Error('WebGL not supported');
+}
 
-        const fragmentShader = `
-            precision mediump float;
-            uniform vec4 color;
-            void main() {
-                gl_FragColor = color;
-            }`;
+// vertexData = [...]
 
+// create buffer
+// load vertexData into buffer
 
-        //compile shaders
+// create vertex shader
+// create fragment shader
+// create program
+// attach shaders to program
 
-        const vs = gl.createShader(gl.VERTEX_SHADER);
-        gl.shaderSource(vs, vertexShader);
-        gl.compileShader(vs);
+// enable vertex attributes
 
-        const fs = gl.createShader(gl.FRAGMENT_SHADER);
-        gl.shaderSource(fs, fragmentShader);
-        gl.compileShader(fs);
+// draw
 
+const vertexData = [
+    0, 1, 0,    // V1.position
+    1, -1, 0,   // V2.position
+    -1, -1, 0,  // V3.position
+];
 
-        // Create and initialize the WebGL program
-        const program = gl.createProgram();
-        gl.attachShader(program, vs);
-        gl.attachShader(program, fs);
-        gl.linkProgram(program);
-        gl.useProgram(program);
+const colorData = [
+    1, 0, 0,    // V1.color
+    0, 1, 0,    // V2.color
+    0, 0, 1,    // V3.color
+];
 
+const positionBuffer = gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertexData), gl.STATIC_DRAW);
 
-        // Shader attribute variable for position
-        const position = gl.getAttribLocation(program, "position");
+const colorBuffer = gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
+gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colorData), gl.STATIC_DRAW);
 
-        // Create the GPU array buffer with the vertices
-        const buffer = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-        gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
-        gl.vertexAttribPointer(
-            position, // Target
-            3,        // Chunk size (send the values 3 by 3)
-            gl.FLOAT, // Type
-            false,    // Normalize
-            0,        // Stride
-            0         // Offset
-        );
-        gl.enableVertexAttribArray(position);
+const vertexShader = gl.createShader(gl.VERTEX_SHADER);
+gl.shaderSource(vertexShader, `
+precision mediump float;
+attribute vec3 position;
+attribute vec3 color;
+varying vec3 vColor;
+void main() {
+    vColor = color;
+    gl_Position = vec4(position, 1);
+}
+`);
+gl.compileShader(vertexShader);
 
-        // Shader uniform variable for color (read-only)
-        const color = gl.getUniformLocation(program, "color");
+const fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
+gl.shaderSource(fragmentShader, `
+precision mediump float;
+varying vec3 vColor;
+void main() {
+    gl_FragColor = vec4(vColor, 1);
+}
+`);
+gl.compileShader(fragmentShader);
+console.log(gl.getShaderInfoLog(fragmentShader));
 
-        // Set color        R  G  B  A
-        gl.uniform4f(color, 0, 1, 0, 1);
+const program = gl.createProgram();
+gl.attachShader(program, vertexShader);
+gl.attachShader(program, fragmentShader);
 
-        // Set the clear color
-        gl.clearColor(0.0, 0.0, 0.0, 1.0);
+gl.linkProgram(program);
 
-        // Clear canvas
-        gl.clear(gl.COLOR_BUFFER_BIT);
+const positionLocation = gl.getAttribLocation(program, `position`);
+gl.enableVertexAttribArray(positionLocation);
+gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+gl.vertexAttribPointer(positionLocation, 3, gl.FLOAT, false, 0, 0);
 
-        // Render
-        gl.drawArrays(
-            gl.TRIANGLES, // Mode
-            0,            // Start
-            3             // Count
-        );
+const colorLocation = gl.getAttribLocation(program, `color`);
+gl.enableVertexAttribArray(colorLocation);
+gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
+gl.vertexAttribPointer(colorLocation, 3, gl.FLOAT, false, 0, 0);
+
+gl.useProgram(program);
+gl.drawArrays(gl.TRIANGLES, 0, 3);
+
 
     </script>
 </body>

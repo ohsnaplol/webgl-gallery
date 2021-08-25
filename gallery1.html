@@ -11,49 +11,87 @@
     <canvas id="canvas" width="600" height="600"></canvas>
     <script> 
       // We will put our WebGL code here
-
-     //vertices & index buffer
-
-        const vertices = new Float32Array([
-            0.0, 0.5, 0.0, // First vertex
-            -0.5, -0.5, 0.0, // Second vertex
-            0.5, -0.5, 0.0  // Third vertex
-        ]);
-
-        //const indices[] = {
-        //    0, 1, 2,
-        //    2, 3, 0
-        //};
-
+      
         const gl = document.getElementById("canvas").getContext("webgl");
+        
+        if (!gl) {
+            throw new Error('WebGL not supported');
+        }        
+
+        //vertices
+        //GOOD IDEA TO KEEP THESE TYPES GENERIC THEN USE FLOAT32ARRY ON THEM IN BUFFER DATA SPECIFIERS below
+        //fucking javascript i swear
+
+        const verticesData = [
+            0, 1, 0, // First vertex
+            1, -1, 0, // Second vertex
+            -1, -1, 0  // Third vertex
+        ];
+        
+        //color data
+        const colorData = [
+            1,0,0, //this is just r then g then b
+            0,1,0, //each vertex is going to get one triplet of values in array that are rbg values
+            0,0,1,
+        ];
+
+
+
+        //set up buffers
+        
+        // Create the GPU array buffer with the vertices
+        const positionBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);          
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(verticesData), gl.STATIC_DRAW);
+        
+        
+        // Create the GPU array buffer with color data for the vertices
+        const colorBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);           
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colorData), gl.STATIC_DRAW);
+        
+        
+        
 
         //declare shaders
-        const vertexShader = `
-            attribute vec4 position;
+        const vs = gl.createShader(gl.VERTEX_SHADER);
+        
+        
+        //varying can be shared between vertex and fragmentShader
+        const vertexShaderText = `
+            precision mediump float;
+            attribute vec3 position;
+            attribute vec3 color;
+            varying vec3 vColor;
+            
             void main() {
-                gl_Position = position;
+                vColor = color;
+                gl_Position = vec4(position,1);
             }`;
             
         //gl_Position is output of vertex shader
 
-        const fragmentShader = `
+        const fs = gl.createShader(gl.FRAGMENT_SHADER);
+        const fragmentShaderText = `
             precision mediump float;
-            uniform vec4 color;
+            varying vec3 vColor;
             void main() {
-                gl_FragColor = color;
+                gl_FragColor = vec4(vColor,1);
             }`;
 
 
         //compile shaders
         //shader source takes in string containing GLSL code
 
-        const vs = gl.createShader(gl.VERTEX_SHADER);
-        gl.shaderSource(vs, vertexShader);
-        gl.compileShader(vs);
 
-        const fs = gl.createShader(gl.FRAGMENT_SHADER);
-        gl.shaderSource(fs, fragmentShader);
+        gl.shaderSource(vs, vertexShaderText);
+        gl.compileShader(vs);
+        console.log(gl.getShaderInfoLog(vs));
+
+        
+        gl.shaderSource(fs, fragmentShaderText);
         gl.compileShader(fs);
+        console.log(gl.getShaderInfoLog(fs));
 
         //shaders must be compiled, and then linked to active gl program
         // Create and initialize the WebGL program
@@ -67,24 +105,17 @@
         gl.linkProgram(program);
         
 
-        
-        
-        // Create the GPU array buffer with the vertices
-        const buffer = gl.createBuffer();
-        //bind buffer as current array buffer
-        gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-        gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);        
-
-
         // Shader attribute variable for position
         //matches position attribute in vertex shader
-        const positionLocation = gl.getAttribLocation(program, "position");
-
+        const positionLocation = gl.getAttribLocation(program, `position`);
         //attribute comes disabled
         //must enable it with the location
         gl.enableVertexAttribArray(positionLocation);
-        
-        //set pointer
+        //opengl has generic attributes that your customer attributes
+        //must be attached to through the ___AttribPointer commands
+        //must bindBuffer again before running gl.vertexAttrib
+        gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);        
+        //set pointer for vertices
         gl.vertexAttribPointer(
             positionLocation, // Target
             3,        // Chunk size (send the values 3 by 3)
@@ -94,19 +125,22 @@
             0         // Offset
         );
         
+        
+        //do same thing for color attribs
+        const colorLocation = gl.getAttribLocation(program, `color`);
+        gl.enableVertexAttribArray(colorLocation);       
+        //bind buffer again as current array buffer
+        gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);        
+        //set pointer for colors
+        gl.vertexAttribPointer(colorLocation, 3, gl.FLOAT, false, 0, 0);
+        
+
+        
         //https://docs.gl/gl4/glUseProgram
         //installs program into current rendering state
         //creates the executable program on the GPU
         gl.useProgram(program);        
         
-
-        // Shader uniform variable for color (read-only)
-        // attach js color variable to the color located instide the GLSL
-        const colorLocation = gl.getUniformLocation(program, "color");
-
-        // Set color        R  G  B  A
-        // color in this case is 
-        gl.uniform4f(colorLocation, 0, 1, 0, 1);
 
         // Set the clear color
         gl.clearColor(0.0, 0.0, 0.0, 1.0);
