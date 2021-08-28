@@ -246,10 +246,27 @@ const uniformLocations = {
 
 const matrix = glMatrix.mat4.create();
 
-//use diffferent transformations
+//shift matrix away with translation
 
+glMatrix.mat4.translate(matrix, matrix,[.5,0,-1]);
+
+//perspective
+const projectionMatrix = glMatrix.mat4.create();
+glMatrix.mat4.perspective(projectionMatrix,
+	(75 / 180) * Math.PI, //v fov in radians
+	canvas.width / canvas.height, //aspect ratio
+	1e-4, //near cull plane / distance at which object can get close before they clip out, this is exponential notation
+	1e4	//far cull plane, this is draw distance a-la PS1 silent hill
+)
+
+//final matrix that prior transformation operations are combined into
+const finalMatrix = glMatrix.mat4.create();
+
+//use diffferent transformations
 //make it fit in the window
 glMatrix.mat4.scale(matrix, matrix, [0.5, 0.5, 0.5]);
+
+
 
 
 //renderloop
@@ -269,7 +286,12 @@ function renderLoop() {
 	glMatrix.mat4.rotateX(matrix,matrix, 2/ 360);
 	glMatrix.mat4.rotateY(matrix,matrix, 2/ 720);
 	console.log(matrix);
-	gl.uniformMatrix4fv(uniformLocations.matrix, false, matrix);
+	
+	
+	// apply tranformation from two other matrices to final matrix
+	glMatrix.mat4.multiply(finalMatrix, projectionMatrix, matrix);
+	
+	gl.uniformMatrix4fv(uniformLocations.matrix, false, finalMatrix);
 	
 	// Render
 	gl.drawArrays(
