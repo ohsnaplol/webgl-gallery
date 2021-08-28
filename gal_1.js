@@ -218,6 +218,9 @@ gl.vertexAttribPointer(colorLocation, 3, gl.FLOAT, false, 0, 0);
 //creates the executable program on the GPU
 gl.useProgram(program);
 
+//enable depth testing
+gl.enable(gl.DEPTH_TEST);
+
 
 
 
