@@ -83,11 +83,29 @@ function randomColor(){
 }
 
 //color data with random function
-let colorData = [
-	...randomColor(),
-	...randomColor(),
-	...randomColor(),
-];
+// let colorData = [
+	// ...randomColor(),
+	// ...randomColor(),
+	// ...randomColor(),
+// ];
+
+//randomize color for cube vertexes
+let colorData = []; //weird JS array nonsense
+
+for (let face = 0; face < 6; face++){
+	let faceColor = randomColor();
+	//this is overwriting two vertices color twice
+	//6 vertices
+	//*		**
+	//	 
+	//**	*
+	for(let vertex = 0; vertex < 6; vertex++){
+		colorData.push(...faceColor);
+		
+	}
+	
+}
+
 
 
 
@@ -245,7 +263,7 @@ function renderLoop() {
 	
 	//rotation
 	//glMatrix.mat4.rotateZ(matrix,matrix, 2/ 360);
-	//glMatrix.mat4.rotateX(matrix,matrix, 2/ 360);
+	glMatrix.mat4.rotateX(matrix,matrix, 2/ 360);
 	glMatrix.mat4.rotateY(matrix,matrix, 2/ 720);
 	console.log(matrix);
 	gl.uniformMatrix4fv(uniformLocations.matrix, false, matrix);
@@ -254,7 +272,7 @@ function renderLoop() {
 	gl.drawArrays(
 		gl.TRIANGLES, // Mode
 		0,            // Start
-		3             // Count
+		verticesData.length / 3 //changed so this autocomputes number of triangles
 	);
 					// we have X elements in our array,
 					//when COUNT = 3
