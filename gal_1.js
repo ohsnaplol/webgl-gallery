@@ -10,19 +10,84 @@ if (!gl) {
 //GOOD IDEA TO KEEP THESE TYPES GENERIC THEN USE FLOAT32ARRY ON THEM IN BUFFER DATA SPECIFIERS below
 //fucking javascript i swear
 
+// const verticesData = [
+	// 0, 1, 0, // First vertex
+	// 1, -1, 0, // Second vertex
+	// -1, -1, 0  // Third vertex
+// ];
+
 const verticesData = [
-	0, 1, 0, // First vertex
-	1, -1, 0, // Second vertex
-	-1, -1, 0  // Third vertex
+
+	//SHAMELESSCOPYPASTE from https://github.com/invent-box/Learn-WebGL/blob/master/06-Box/public/main.js
+    // Front
+    0.5, 0.5, 0.5,
+    0.5, -.5, 0.5,
+    -.5, 0.5, 0.5,
+    -.5, 0.5, 0.5,
+    0.5, -.5, 0.5,
+    -.5, -.5, 0.5,
+
+    // Left
+    -.5, 0.5, 0.5,
+    -.5, -.5, 0.5,
+    -.5, 0.5, -.5,
+    -.5, 0.5, -.5,
+    -.5, -.5, 0.5,
+    -.5, -.5, -.5,
+
+    // Back
+    -.5, 0.5, -.5,
+    -.5, -.5, -.5,
+    0.5, 0.5, -.5,
+    0.5, 0.5, -.5,
+    -.5, -.5, -.5,
+    0.5, -.5, -.5,
+
+    // Right
+    0.5, 0.5, -.5,
+    0.5, -.5, -.5,
+    0.5, 0.5, 0.5,
+    0.5, 0.5, 0.5,
+    0.5, -.5, 0.5,
+    0.5, -.5, -.5,
+
+    // Top
+    0.5, 0.5, 0.5,
+    0.5, 0.5, -.5,
+    -.5, 0.5, 0.5,
+    -.5, 0.5, 0.5,
+    0.5, 0.5, -.5,
+    -.5, 0.5, -.5,
+
+    // Bottom
+    0.5, -.5, 0.5,
+    0.5, -.5, -.5,
+    -.5, -.5, 0.5,
+    -.5, -.5, 0.5,
+    0.5, -.5, -.5,
+    -.5, -.5, -.5,
+
+
 ];
 
-//color data
-const colorData = [
-	1,0,0, //this is just r then g then b
-	0,1,0, //each vertex is going to get one triplet of values in array that are rbg values
-	0,0,1,
-];
+//color data in rgb
+// const colorData = [
+	// 1,0,0, //this is just r then g then b
+	// 0,1,0, //each vertex is going to get one triplet of values in array that are rbg values
+	// 0,0,1,
+// ];
 
+function randomColor(){
+	return [Math.random(),Math.random(),Math.random()];
+	
+}
+
+//color data with random function
+let colorData = [
+	...randomColor(),
+	...randomColor(),
+	...randomColor(),
+];
 
 
 
@@ -135,13 +200,7 @@ gl.vertexAttribPointer(colorLocation, 3, gl.FLOAT, false, 0, 0);
 //creates the executable program on the GPU
 gl.useProgram(program);
 
-//set background color
-// Set the clear color
-gl.clearColor(0.0, 0.0, 0.0, 1.0);
 
-// Clear canvas
-// clears out background
-gl.clear(gl.COLOR_BUFFER_BIT);
 
 
 /// **NOW** is when we can feed in data for rotation 
@@ -176,9 +235,17 @@ glMatrix.mat4.scale(matrix, matrix, [0.5, 0.5, 0.5]);
 function renderLoop() {
 	requestAnimationFrame(renderLoop);
 	
+	//set background color
+	// Set the clear color
+	gl.clearColor(0.0, 0.0, 0.0, 1.0);
+
+	// Clear canvas
+	// clears out background
+	gl.clear(gl.COLOR_BUFFER_BIT);		
+	
 	//rotation
 	//glMatrix.mat4.rotateZ(matrix,matrix, 2/ 360);
-	glMatrix.mat4.rotateX(matrix,matrix, 2/ 360);
+	//glMatrix.mat4.rotateX(matrix,matrix, 2/ 360);
 	glMatrix.mat4.rotateY(matrix,matrix, 2/ 720);
 	console.log(matrix);
 	gl.uniformMatrix4fv(uniformLocations.matrix, false, matrix);
@@ -193,6 +260,8 @@ function renderLoop() {
 					//when COUNT = 3
 					//that means we take 0 for x, 1 for y, 2 for z, then start overflow
 					//so (arraysize) / count = # of vertexes
+					
+				
 
 
 }
