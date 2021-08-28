@@ -244,11 +244,11 @@ const uniformLocations = {
 //out gets the data of acting upon your input matrix with  your vector
 //must call using glMatrix. prefix
 
-const matrix = glMatrix.mat4.create();
+const modelMatrix = glMatrix.mat4.create();
 
 //shift matrix away with translation
 
-glMatrix.mat4.translate(matrix, matrix,[.5,0,-1]);
+glMatrix.mat4.translate(modelMatrix, modelMatrix,[-.5,-0.5,-1.5]);
 
 //perspective
 const projectionMatrix = glMatrix.mat4.create();
@@ -264,7 +264,7 @@ const finalMatrix = glMatrix.mat4.create();
 
 //use diffferent transformations
 //make it fit in the window
-glMatrix.mat4.scale(matrix, matrix, [0.5, 0.5, 0.5]);
+glMatrix.mat4.scale(modelMatrix, modelMatrix, [0.5, 0.5, 0.5]);
 
 
 
@@ -283,13 +283,13 @@ function renderLoop() {
 	
 	//rotation
 	//glMatrix.mat4.rotateZ(matrix,matrix, 2/ 360);
-	glMatrix.mat4.rotateX(matrix,matrix, 2/ 360);
-	glMatrix.mat4.rotateY(matrix,matrix, 2/ 720);
-	console.log(matrix);
+	//glMatrix.mat4.rotateX(matrix,matrix, 2/ 360);
+	glMatrix.mat4.rotateY(modelMatrix,modelMatrix, 2/ 720);
+	console.log(modelMatrix);
 	
 	
 	// apply tranformation from two other matrices to final matrix
-	glMatrix.mat4.multiply(finalMatrix, projectionMatrix, matrix);
+	glMatrix.mat4.multiply(finalMatrix, projectionMatrix, modelMatrix);
 	
 	gl.uniformMatrix4fv(uniformLocations.matrix, false, finalMatrix);
 	
